@@ -4,7 +4,7 @@ Baseline: a thin-walled element carrying a membrane load per unit width.
 Erosion removes thickness from the wind-facing face; the remaining section
 carries the same load at higher stress. Drag pressure is applied as a
 uniform lateral pressure and reported, which for a small panel is a check,
-not a driver: at 400 km the drag pressure is of order 1e-5 Pa.
+not a driver: at 400 km the drag pressure is of order 1e-4 Pa.
 
 The full engine is a finite element model (CalculiX, FEniCS) that takes the
 per-element pressure, heat flux and thickness fields through

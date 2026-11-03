@@ -19,4 +19,5 @@ Thumbs.db
 
 # Run output
 out/
+orbitwear-out/
 *.log

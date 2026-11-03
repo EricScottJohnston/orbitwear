@@ -1,0 +1,7 @@
+# Region type : patch ram
+# Faces       : 256
+# Area        : 1.000000e+00
+# Scale factor: 1.000000e+00
+# Time        	areaIntegrate(qMean)	areaIntegrate(fDMean)
+2e-03	7.400000e-01	(-2.500000e-04 1.000000e-07 -2.000000e-08)
+3e-03	7.500000e-01	(-2.540000e-04 1.000000e-07 -2.000000e-08)

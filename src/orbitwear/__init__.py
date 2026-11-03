@@ -1,14 +1,21 @@
 """orbitwear: how materials hold up in low Earth orbit, molecule to structure.
 
-Four stages, chained by :mod:`orbitwear.pipeline`:
+A simulator that couples OpenFOAM (dsmcFoam, rarefied flow) with CalculiX
+(finite element structure) through an atomic oxygen erosion model:
 
-1. :mod:`orbitwear.atmosphere`  flux of each species onto each surface element
-2. :mod:`orbitwear.surface`     momentum and energy transfer: drag and heating
-3. :mod:`orbitwear.erosion`     atomic oxygen fluence and material loss
-4. :mod:`orbitwear.structure`   section loss and stress
+1. :mod:`orbitwear.openfoam`    dsmcFoam case: drag, shear and heating on the panel
+2. :mod:`orbitwear.erosion`     atomic oxygen fluence and thickness lost
+3. :mod:`orbitwear.calculix`    shell model at the eroded thickness: stress, deflection
+4. :mod:`orbitwear.simulate`    the chain over a mission, with fallbacks
+
+Built-in models stand in for each engine when it is not installed:
+:mod:`orbitwear.atmosphere` and :mod:`orbitwear.surface` for the flow,
+:mod:`orbitwear.structure` for the structure. :mod:`orbitwear.pipeline` runs
+the built-in chain alone.
 """
 
 from .pipeline import Mission, Panel, run
+from .simulate import Case, SimulationResult, simulate
 
-__all__ = ["Mission", "Panel", "run"]
-__version__ = "0.0.1"
+__all__ = ["Case", "Mission", "Panel", "SimulationResult", "run", "simulate"]
+__version__ = "1.0.0"

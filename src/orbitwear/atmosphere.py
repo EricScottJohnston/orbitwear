@@ -42,10 +42,44 @@ _DENSITY_TABLE = [
     (1000, 3.019e-15, 268.00),
 ]
 
-# Atomic oxygen share of particles by number near 400 km, solar mean. The
-# thermosphere above 200 km is mostly atomic oxygen (NRLMSIS 2.0 climatology);
-# a single fraction is a baseline, not a model.
-O_NUMBER_FRACTION = 0.9
+# Representative composition by number fraction near 400 km, solar mean. The
+# thermosphere above 200 km is mostly atomic oxygen (NRLMSIS 2.0 climatology).
+# This is a default so a case runs; replace it with NRLMSIS output for the
+# actual mission (date, solar flux F10.7, geomagnetic index Ap).
+DEFAULT_COMPOSITION = {"O": 0.90, "N2": 0.08, "He": 0.02}
+
+# Variable hard sphere (VHS) molecular properties for DSMC, reference
+# temperature 273 K. Source: G. A. Bird, "Molecular Gas Dynamics and the
+# Direct Simulation of Gas Flows", Oxford 1994, Table A1. Bird lists the
+# atomic species with approximate values; treat O and N as estimates.
+SPECIES = {
+    #        mass kg      VHS diameter m  internal dof  viscosity index omega
+    "O":   (2.6567e-26, 3.00e-10, 0, 0.75),
+    "N":   (2.3259e-26, 3.00e-10, 0, 0.75),
+    "N2":  (4.6500e-26, 4.17e-10, 2, 0.74),
+    "O2":  (5.3120e-26, 4.07e-10, 2, 0.77),
+    "He":  (6.6500e-27, 2.33e-10, 0, 0.66),
+    "Ar":  (6.6300e-26, 4.17e-10, 0, 0.81),
+}
+
+
+def mean_mass(composition: dict[str, float]) -> float:
+    """Mean particle mass, kg, of a composition given by number fraction."""
+    total = sum(composition.values())
+    if total <= 0:
+        raise ValueError("composition fractions must sum to more than zero")
+    unknown = sorted(set(composition) - set(SPECIES))
+    if unknown:
+        raise KeyError(f"no molecular data for {unknown}; known: {sorted(SPECIES)}")
+    return sum(SPECIES[s][0] * x for s, x in composition.items()) / total
+
+
+def number_densities(altitude_m: float, composition: dict[str, float] | None = None) -> dict[str, float]:
+    """Number density of each species, 1/m^3, from the density table and a composition."""
+    comp = composition or DEFAULT_COMPOSITION
+    total = sum(comp.values())
+    n = exponential_density(altitude_m) / mean_mass(comp)
+    return {s: n * x / total for s, x in comp.items()}
 
 
 @dataclass(frozen=True)
@@ -97,7 +131,8 @@ def exponential_density(altitude_m: float) -> float:
     return rho0 * float(np.exp(-(alt_km - alt0) / h))
 
 
-def baseline_flux(orbit: Orbit, incidence_cos: float = 1.0, temperature: float = 1000.0) -> Flux:
+def baseline_flux(orbit: Orbit, incidence_cos: float = 1.0, temperature: float = 1000.0,
+                  composition: dict[str, float] | None = None) -> Flux:
     """Free-molecular flux from the exponential density model.
 
     The gas is taken as moving at orbital speed relative to the spacecraft,
@@ -106,10 +141,10 @@ def baseline_flux(orbit: Orbit, incidence_cos: float = 1.0, temperature: float =
     the baseline ignores.
     """
     rho = exponential_density(orbit.altitude_m)
-    n_total = rho / M_AIR
+    nd = number_densities(orbit.altitude_m, composition)
     return Flux(
         mass_density=rho,
-        number_density_O=O_NUMBER_FRACTION * n_total,
+        number_density_O=nd.get("O", 0.0),
         speed=orbit.speed,
         incidence_cos=incidence_cos,
         temperature=temperature,

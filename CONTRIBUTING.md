@@ -13,20 +13,24 @@ Issues and pull requests are open to anyone.
   their modules. Add fields rather than renaming them, so downstream stages
   keep working.
 
-## Where the real engines go
+## Where work is most wanted
 
-Each stage has a baseline that runs with NumPy alone, and a hook for a full
-engine. Contributions that wire in an engine are welcome:
+The engines are OpenFOAM (`orbitwear/openfoam.py`) and CalculiX
+(`orbitwear/calculix.py`). Each stage also has a built-in stand-in that runs
+with NumPy alone. The most useful contributions now:
 
-| Stage | Hook | Candidate engines |
+| Area | What | Where |
 | --- | --- | --- |
-| Atmosphere | `atmosphere.FluxModel` | SPARTA (DSMC), NRLMSIS 2.x for density |
-| Surface | `surface.ScatteringKernel` | CLL, Maxwell with energy dependence |
-| Erosion | `erosion.YieldModel` | ASTM E2089 yields, angle and temperature dependence |
-| Structure | `structure.StructuralModel` | CalculiX, FEniCS |
+| Validation | Run the example against a live dsmcFoam and report the numbers | `openfoam.py`, an issue |
+| Geometry | Arbitrary STL parts, mapped from flow faces to shell elements | `geometry.py` |
+| Erosion | Species-resolved wall flux from the DSMC solution; angle and temperature yields | `erosion.py`, `openfoam.py` |
+| Atmosphere | NRLMSIS 2.x density and composition by date and solar activity | `atmosphere.py` |
+| Structure | Nonlinear geometry, thermal fields from the flow heat flux | `calculix.py` |
 
-Keep engines optional. The package must still install and run its baselines
-with NumPy only.
+Keep engines optional. The package must install and run its stand-ins with
+NumPy only, and the unit tests must pass without OpenFOAM or CalculiX.
+Tests that need a real engine go in `tests/test_engines_live.py` with a skip
+when the engine is missing.
 
 ## Style
 

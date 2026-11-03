@@ -1,0 +1,5 @@
+# Region type : patch sides
+# Faces       : 128
+# Area        : 8.000000e-02
+# Time        	areaIntegrate(qMean)	areaIntegrate(fDMean)_x	areaIntegrate(fDMean)_y	areaIntegrate(fDMean)_z
+3e-03	1.200000e-03	-4.000000e-07	0.000000e+00	0.000000e+00

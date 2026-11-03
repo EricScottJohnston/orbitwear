@@ -1,0 +1,54 @@
+# A ram-facing Kapton H panel, 1 m square, 125 um thick, at 400 km for one year.
+#
+#   orbitwear run examples/kapton_400km.toml -o out/kapton
+#
+# Engines run when installed ("auto"); set enabled = "on" to require one or
+# "off" to use the built-in model. "orbitwear check" reports what is found.
+
+[orbit]
+altitude_km = 400
+
+[mission]
+duration_days = 365.25
+steps = 12
+
+[panel]
+material = "kapton_H"          # erosion yield table key, see orbitwear/erosion.py
+width_m = 1.0
+height_m = 1.0
+thickness_um = 125             # 5 mil film
+incidence_deg = 0              # 0 = facing straight into the wind
+wall_temperature_K = 300
+accommodation = 0.9            # diffuse fraction of wall interactions (Moe and Moe 2005)
+flow_box_depth_m = 0.02        # thickness of the closed box the flow solver sees
+
+[structure]
+# DuPont Kapton HN data sheet, 23 C: tensile modulus 2.5 GPa, yield point at 3 % 69 MPa,
+# Poisson's ratio 0.34, thermal expansion 20 ppm/K.
+youngs_modulus_GPa = 2.5
+poisson_ratio = 0.34
+yield_strength_MPa = 69
+membrane_load_N_per_m = 20
+expansion_per_K = 2.0e-5
+delta_T_K = 0
+mesh_nx = 8
+mesh_ny = 8
+
+[atmosphere]
+temperature_K = 1000
+# Number fractions. A representative default; use NRLMSIS output for a real mission.
+composition = { O = 0.90, N2 = 0.08, He = 0.02 }
+
+[openfoam]
+enabled = "auto"
+target_particles = 200000
+flow_throughs = 5
+average_after = 2
+surface_level = 4
+# Launcher for OpenFOAM inside WSL or Docker; {cmd}, {case} and {case_wsl} are filled in.
+# command = 'wsl -- bash -lc "source /usr/lib/openfoam/openfoam2406/etc/bashrc && cd {case_wsl} && {cmd}"'
+# command = 'docker run --rm -v {case}:/case -w /case opencfd/openfoam-default:2406 {cmd}'
+
+[calculix]
+enabled = "auto"
+# command = "ccx"              # or the full path to ccx / ccx.exe
